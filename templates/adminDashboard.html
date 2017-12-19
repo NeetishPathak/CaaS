@@ -1,0 +1,145 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Container as a Service</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+          <h1 class="page-header">Welcome, {{ name }}</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <style>
+              .containers {
+              font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+              table-layout: fixed;
+              border-collapse: collapse;
+              width: 200px;
+              }
+              .containers td, .containers th {
+              border: 1px solid #ddd;
+              padding: 20px;
+              width: 180px;
+              }
+              .containers tr:nth-child(even){background-color: #f2f2f2;}
+              .containers tr:hover {background-color: #ddd;}
+              .containers th {
+              padding-top: 12px;
+              padding-bottom: 12px;
+              text-align: left;
+              background-color: #4c84af;
+              color: white;
+              }
+              </style>
+
+              <br>
+              <h4>List of User reservations</h4>
+              <form method=POST action="/admin_delete_reservation">
+              <table class="containers"> 
+                <tr> 
+                  <th>Name</th> 
+                  <th>IP</th> 
+                  <th>Nat Port</th>
+                  <th>Docker Port</th>
+                  <th>Status</th>
+                  <th>User Name</th>
+                  <th>Image</th>
+                  <th>Compute Node ID</th>
+                  <th>Compute Node IP</th>
+                  <th>Action</th>
+                </tr> 
+                {% for res in reservations %} 
+                <tr> 
+                  <td>{{res.container_name}}</td>
+                  <td>{{res.management_ip}}</td>
+                  <td>{{res.nat_port}}</td>
+                  <td>{{res.docker_port}}</td>
+                  <td>{{res.container_status}}</td>
+                  <td>{{res.user.username}}</td>
+                  <td>{{res.image.image_name}}</td>
+                  <td>{{res.node.id}}</td>
+                  <td>{{res.node.ip_addr}}</td>
+                  <td><button class="btn btn-danger" type="submit" name="delete" value="{{res.container_id}}"> Delete Reservation</button></td>
+                </tr> 
+                {% endfor %} 
+              </table>
+              </form>
+
+              <br>
+              <h4>List of Compute Nodes</h4>
+              <table class="containers"> 
+                <tr> 
+                  <th>Node Id </th> 
+                  <th>HostName/Ip Address</th> 
+                  <th>Status</th> 
+                  <th>Capacity</th> 
+                  <th>Current Load</th>
+                </tr> 
+                {% for node in compute_nodes %} 
+                <tr> 
+                  <td>{{node[0].id}}</td> 
+                  <td>{{node[0].ip_addr}}</td> 
+                  <td>{{node[0].compute_node_status}}</td> 
+                  <td>{{node[0].compute_node_wt}}</td> 
+                  <td>
+                    {{node[1]}}
+                  </td>
+                </tr> 
+                {% endfor %} 
+              </table>
+
+              <br>
+              <h4>List of Images</h4>
+              <table class="containers"> 
+                <tr> 
+                  <th>Image Id </th> 
+                  <th>Image Name</th> 
+                  <th>Weight</th> 
+                  <th>Description</th> 
+                </tr> 
+                {% for img in images %} 
+                <tr> 
+                  <td>{{img.image_id}}</td> 
+                  <td>{{img.image_name}}</td> 
+                  <td>{{img.image_wt}}</td> 
+                  <td>{{img.description}}</td> 
+                </tr> 
+                {% endfor %} 
+              </table>
+
+            </div>
+          </div>
+            </div>
+    </div>
+{% endblock %}

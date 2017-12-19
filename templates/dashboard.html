@@ -1,0 +1,186 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='dashboard.css')}}">
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Container as a Service</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+          <h1 class="page-header">Welcome, {{ name }}</h1>
+                  <h4><Strong>Current Reservations</Strong></h4>
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-4 placeholder">
+              <br>
+              <style>
+#containers {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    table-layout: fixed;
+    border-collapse: collapse;
+    width: 200px;
+}
+
+#containers td, #containers th {
+    border: 1px solid #ddd;
+    padding: 20px;
+    width: 180px;
+}
+
+#containers tr:nth-child(even){background-color: #f2f2f2;}
+
+#containers tr:hover {background-color: #ddd;}
+
+#containers th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4c84af;
+    color: white;
+}
+</style>
+<form method=POST action="/delete_reservation">
+<table id="containers">
+  <tr>
+    <th>Container Name</th>
+    <th>Image Name</th>
+    <th>HostName/Ip Address</th>
+    <th>Port</th>
+    <th>Username</th>
+    <th>Password</th>
+    <th>Status</th>
+    <th>Action</th>
+  </tr>
+  {% for res in user_containers %}
+  <tr>
+    <td>{{res.container_name}}</td>
+    <td>{{res.image.image_name}}</td>
+    <td>{{res.management_ip}}</td>
+    <td>{{res.nat_port}}</td>
+    <td>{{res.container_username}}</td>
+    <td>{{res.container_passwd}}</td>
+    <td>{{res.container_status}}</td>
+    <td><button class="btn btn-danger" type="submit" name="delete" value="{{res.container_id}}"> Delete Reservation</button></td>
+  </tr>
+  {% endfor %}
+</table>
+  </form>
+            </div>
+          </div>
+
+          <h4><strong>Create New Reservations</strong></h4>
+          <hr>
+          <div class="row placeholders">
+            <form method="POST" action="/create_user_reservation">
+              <div class="col-xs-6 col-sm-2 placeholder">
+                <label for="images">Choose Image</label>
+                <br><select id= "images" name="images" selected="myval">
+                {% for image in images %}
+                <option value={{image.image_name}}>{{image.image_name}}</option>
+                {% endfor %}
+              </select>
+              </div>
+
+              <div class="col-xs-6 col-sm-2 placeholder">
+                <label for="memoryRange">Memory Range</label>
+                <input type="range" id="memoryRange" name="memoryRange" min="4" max="4096" value=1024 step ="1" onchange="updateMemoryInput(this.value);">
+                Memory(in MB) <input type="text" id="memoryVal" value="5">
+                <script>
+                function updateMemoryInput(val)
+                {
+                  document.getElementById('memoryVal').value=val;
+                }
+                </script>
+              </div>
+
+              <div class="col-xs-6 col-sm-2 placeholder">
+                <label for="cpuRange">Max CPU Utilization</label>
+                <input type="range" id="cpuRange" name="cpuRange" min="1" max="2" step ="0.1" value=1 onchange="updateCPUInput(this.value);">
+                Max CPU <input type="text" id="cpuVal" value="1">
+                <script>
+                function updateCPUInput(val)
+                {
+                  document.getElementById('cpuVal').value=val;
+                }
+                </script>
+              </div>
+
+              <div class="col-xs-6 col-sm-2 placeholder">
+                <label for="start_date">Choose Start Date</label>
+                <input type="date" id="start_date" name="start_date" value="2017-12-07">
+              </div>
+              <div class="col-xs-6 col-sm-2 placeholder">
+                <label for="end_date">Choose End Date</label>
+                <input type="date" id="end_date" name="end_date" value="2012-12-12">
+              </div>
+              <div class="col-xs-6 col-sm-2 placeholder">
+                <label for="time">Choose Time</label>
+                <br>
+                <select id= "time" name="time">
+                  <option value="now">Now</option>
+                  <option value="after_1_hour">After 1 Hour</option>
+                  <option value="after_4_hour">After 4 Hour</option>
+                </select>
+              </div>
+              <div class="col-xs-6 col-sm-2 placeholder">
+                <br>
+                <input type="submit" value="Create Reservation">
+              </div>
+            </form>
+            <script>
+            function show_alert() {
+              alert("reservation created successfully");
+            }
+          </script>
+
+                      {% if error %}
+          <p class=error><font color="red"><strong>{{ error }}</strong></font>
+            {% endif %}
+
+            <!--
+            <script>
+
+            function show_alert() {
+            if(confirm("Do you really want to do this?"))
+            document.forms[0].submit();
+            else
+            return false;
+            }
+
+          </script>
+          -->
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+{% endblock %}

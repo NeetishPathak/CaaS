@@ -1,0 +1,45 @@
+#
+# Ruby runtime Dockerfile
+#
+# https://github.com/dockerfile/ruby-runtime
+#
+
+# Pull base image.
+FROM ubuntu:16.04
+
+# Install Ruby.
+RUN \
+  apt-get update && \
+  apt-get install -y ruby ruby-dev ruby-bundler && \
+  rm -rf /var/lib/apt/lists/*
+
+# Set instructions on build. ruby-runtime
+
+ONBUILD ADD Gemfile /app/
+ONBUILD ADD Gemfile.lock /app/
+ONBUILD RUN bundle install
+ONBUILD ADD . /app
+
+#install sshd
+RUN apt-get update && apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+RUN echo 'root:passwd123' | chpasswd
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# SSH login fix. Otherwise user is kicked off after login
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+ENV NOTVISIBLE "in users profile"
+RUN echo "export VISIBLE=now" >> /etc/profile
+
+# Define working directory.
+WORKDIR /app
+
+# Set environment variables.
+ENV APPSERVER webrick
+
+# Define default command.
+CMD ["sh", "-c", "bundle exec rackup -p 8080 /app/config.ru -s $APPSERVER ; /usr/sbin/sshd -D"]
+
+# Expose ports.
+EXPOSE 8080
+EXPOSE 22
